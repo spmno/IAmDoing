@@ -36,6 +36,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends Activity implements OnClickListener{
@@ -88,8 +89,8 @@ public class MainActivity extends Activity implements OnClickListener{
 	
     public void connectServer() throws Exception {
 
-        SocketIORequest req = new SocketIORequest("http://koush.clockworkmod.com:8080");
-        req.setLogging("Socket.IO", Log.VERBOSE);
+        SocketIORequest req = new SocketIORequest("http://192.168.1.103:3000");
+        //req.setLogging("Socket.IO", Log.VERBOSE);
         SocketIOClient.connect(AsyncHttpClient.getDefaultInstance(), req, new ConnectCallback() {
             @Override
             public void onConnectCompleted(Exception ex, SocketIOClient client) {
@@ -107,10 +108,29 @@ public class MainActivity extends Activity implements OnClickListener{
                         notifyMessage(string);
                     }
                 });
-                client.on("pong", new EventCallback() {
+                client.on("message", new EventCallback() {
                     @Override
                     public void onEvent(JSONArray arguments, Acknowledge acknowledge) {
                         //trigger2.trigger(arguments.length() == 3);
+                    	String aa = "";  
+                    	try {  
+                    		int length = arguments.length();  
+                    		
+                    		for(int i = 0; i < length; i++){//±éÀúJSONArray  
+                    			Log.d("debugTest",Integer.toString(i));  
+                    			JSONObject oj = arguments.getJSONObject(i);  
+                    			aa = aa + oj.getString("content");  
+                    		}  
+                    	} catch (JSONException e) {  
+                            throw new RuntimeException(e);  
+                        }  
+                        Message message=new Message();  
+                        message.what=1;  
+                        Bundle bundle = new Bundle();    
+                        bundle.putString("text", aa);
+                        message.setData(bundle);
+                        displayHandle.sendMessage(message); 
+                        notifyMessage(aa);
                     }
                 });
                 client.setJSONCallback(new JSONCallback() {
@@ -135,7 +155,15 @@ public class MainActivity extends Activity implements OnClickListener{
 	@Override
 	public void onClick(View arg0) {
 		// TODO Auto-generated method stub
-		socketIOClient.emit(doingContentView.getText().toString());
+		JSONObject jsonMessage = new JSONObject();
+		String doingContent = doingContentView.getText().toString();
+		try {
+			jsonMessage.put("message", doingContent);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		socketIOClient.emit(jsonMessage);
 	}
 	
 	private void notifyMessage(String content) {
