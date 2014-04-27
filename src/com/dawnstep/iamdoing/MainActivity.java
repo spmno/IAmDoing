@@ -79,6 +79,11 @@ public class MainActivity extends Activity implements OnClickListener{
 		}
 	}
 
+	@Override 
+	protected void onStart() {
+		super.onStart();
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -89,7 +94,7 @@ public class MainActivity extends Activity implements OnClickListener{
 	
     public void connectServer() throws Exception {
 
-        SocketIORequest req = new SocketIORequest("http://192.168.1.103:3000");
+        SocketIORequest req = new SocketIORequest("http://115.29.139.76:5080");
         //req.setLogging("Socket.IO", Log.VERBOSE);
         SocketIOClient.connect(AsyncHttpClient.getDefaultInstance(), req, new ConnectCallback() {
             @Override
@@ -177,6 +182,7 @@ public class MainActivity extends Activity implements OnClickListener{
                .setWhen(System.currentTimeMillis())//设置时间发生时间  
                .setAutoCancel(true)//设置可以清除  
                .setContentTitle("Doing")//设置下拉列表里的标题  
+               .setDefaults(Notification.DEFAULT_ALL)
                .setContentText(content);//设置上下文内容  
         Notification notification = builder.build(); 
         //加i是为了显示多条Notification  
