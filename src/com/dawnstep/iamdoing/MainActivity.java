@@ -45,7 +45,7 @@ public class MainActivity extends Activity implements OnClickListener{
     private TextView receiveMessageView;
     private EditText doingContentView;
     private Button sendButton;
-    SocketIOClient socketIOClient;
+
     
 	private Handler displayHandle = new Handler(){  
         public void handleMessage(Message msg) {  
@@ -71,12 +71,6 @@ public class MainActivity extends Activity implements OnClickListener{
 		sendButton = (Button)findViewById(R.id.sendButton);
 		sendButton.setOnClickListener(this);
 		
-		try {
-			connectServer();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	@Override 
@@ -92,70 +86,7 @@ public class MainActivity extends Activity implements OnClickListener{
 	}
 	
 	
-    public void connectServer() throws Exception {
 
-        SocketIORequest req = new SocketIORequest("http://115.29.139.76:5080");
-        //req.setLogging("Socket.IO", Log.VERBOSE);
-        SocketIOClient.connect(AsyncHttpClient.getDefaultInstance(), req, new ConnectCallback() {
-            @Override
-            public void onConnectCompleted(Exception ex, SocketIOClient client) {
-            	socketIOClient = client;
-                client.setStringCallback(new StringCallback() {
-                    @Override
-                    public void onString(String string, Acknowledge acknowledge) {
-                        //trigger1.trigger("hello".equals(string));
-                        Message message=new Message();  
-                        message.what=1;  
-                        Bundle bundle = new Bundle();    
-                        bundle.putString("text", string);
-                        message.setData(bundle);
-                        displayHandle.sendMessage(message); 
-                        notifyMessage(string);
-                    }
-                });
-                client.on("message", new EventCallback() {
-                    @Override
-                    public void onEvent(JSONArray arguments, Acknowledge acknowledge) {
-                        //trigger2.trigger(arguments.length() == 3);
-                    	String aa = "";  
-                    	try {  
-                    		int length = arguments.length();  
-                    		
-                    		for(int i = 0; i < length; i++){//±éÀúJSONArray  
-                    			Log.d("debugTest",Integer.toString(i));  
-                    			JSONObject oj = arguments.getJSONObject(i);  
-                    			aa = aa + oj.getString("content");  
-                    		}  
-                    	} catch (JSONException e) {  
-                            throw new RuntimeException(e);  
-                        }  
-                        Message message=new Message();  
-                        message.what=1;  
-                        Bundle bundle = new Bundle();    
-                        bundle.putString("text", aa);
-                        message.setData(bundle);
-                        displayHandle.sendMessage(message); 
-                        notifyMessage(aa);
-                    }
-                });
-                client.setJSONCallback(new JSONCallback() {
-                    @Override
-                    public void onJSON(JSONObject json, Acknowledge acknowledge) {
-                        //trigger3.trigger("world".equals(json.optString("hello")));
-                    }
-                });
-                
-                //try {
-                //    client.emit("hello");
-                //    client.emit(new JSONObject("{\"hello\":\"world\"}"));
-                //    client.emit("ping", new JSONArray("[2,3,4]"));
-                //}
-                //catch (JSONException e) {
-                //}
-            }
-        });
-
-    }
 
 	@Override
 	public void onClick(View arg0) {
@@ -168,7 +99,6 @@ public class MainActivity extends Activity implements OnClickListener{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		socketIOClient.emit(jsonMessage);
 	}
 	
 	private void notifyMessage(String content) {
